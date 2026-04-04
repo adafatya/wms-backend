@@ -31,3 +31,6 @@ func (h *Handler) CreateUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, res)
 }
+func (h *Handler) RegisterRoutes(router *gin.Engine) {
+	router.POST("/users", h.CreateUser)
+}

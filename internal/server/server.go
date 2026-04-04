@@ -32,7 +32,7 @@ func NewServer(store sqlc.Store, logger *zap.Logger) *Server {
 	})
 
 	// User routes
-	router.POST("/users", userHandler.CreateUser)
+	userHandler.RegisterRoutes(router)
 
 	server.router = router
 	return server
