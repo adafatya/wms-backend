@@ -1,0 +1,12 @@
+# Binaries
+/*.exe
+/*.exe~
+/*.dll
+/*.so
+/*.dylib
+
+# Env files
+.env
+
+# Go workspaces
+go.work
