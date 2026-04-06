@@ -2,6 +2,10 @@ package users
 
 import (
 	"context"
+	"errors"
+
+	"github.com/adafatya/wms-backend/internal/modules/roles"
+	"github.com/adafatya/wms-backend/pkg/utils"
 )
 
 type Service interface {
@@ -9,15 +13,33 @@ type Service interface {
 }
 
 type service struct {
-	repo Repository
+	repo     Repository
+	roleRepo roles.Repository
 }
 
-func NewService(repo Repository) Service {
+func NewService(repo Repository, roleRepo roles.Repository) Service {
 	return &service{
-		repo: repo,
+		repo:     repo,
+		roleRepo: roleRepo,
 	}
 }
 
 func (s *service) CreateUser(ctx context.Context, req CreateUserRequest) (User, error) {
-	return s.repo.CreateUser(ctx, req.Username)
+	if err := ValidateCreateUser(&req); err != nil {
+		return User{}, err
+	}
+
+	// Check if role exists
+	_, err := s.roleRepo.GetRole(ctx, req.RoleID)
+	if err != nil {
+		return User{}, errors.New("role not found or has been deleted")
+	}
+
+	hashedPassword, err := utils.HashPassword(req.Password)
+	if err != nil {
+		return User{}, err
+	}
+	req.Password = hashedPassword
+
+	return s.repo.CreateUser(ctx, req)
 }

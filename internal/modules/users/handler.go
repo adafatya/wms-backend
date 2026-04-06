@@ -16,6 +16,10 @@ func NewHandler(service Service) *Handler {
 	}
 }
 
+func (h *Handler) RegisterRoutes(router *gin.Engine) {
+	router.POST("/users", h.CreateUser)
+}
+
 func (h *Handler) CreateUser(c *gin.Context) {
 	var req CreateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -29,8 +33,5 @@ func (h *Handler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, res)
-}
-func (h *Handler) RegisterRoutes(router *gin.Engine) {
-	router.POST("/users", h.CreateUser)
+	c.JSON(http.StatusCreated, res)
 }

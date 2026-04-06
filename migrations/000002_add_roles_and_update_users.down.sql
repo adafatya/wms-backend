@@ -1,0 +1,10 @@
+DROP INDEX IF EXISTS "users_nik_idx";
+ALTER TABLE "users" DROP CONSTRAINT IF EXISTS "users_role_id_fkey";
+ALTER TABLE "users" DROP COLUMN IF EXISTS "deleted_at";
+ALTER TABLE "users" DROP COLUMN IF EXISTS "updated_at";
+ALTER TABLE "users" DROP COLUMN IF EXISTS "role_id";
+ALTER TABLE "users" DROP COLUMN IF EXISTS "full_name";
+ALTER TABLE "users" DROP COLUMN IF EXISTS "password";
+ALTER TABLE "users" DROP COLUMN IF EXISTS "nik";
+
+DROP TABLE IF EXISTS "roles";
