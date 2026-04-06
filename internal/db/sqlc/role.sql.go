@@ -36,7 +36,7 @@ func (q *Queries) DeleteRole(ctx context.Context, id int64) error {
 }
 
 const getRole = `-- name: GetRole :one
-SELECT id, name, created_at, updated_at, deleted_at FROM roles WHERE id = $1 LIMIT 1
+SELECT id, name, created_at, updated_at, deleted_at FROM roles WHERE id = $1 AND deleted_at IS NULL LIMIT 1
 `
 
 func (q *Queries) GetRole(ctx context.Context, id int64) (Role, error) {
@@ -53,7 +53,7 @@ func (q *Queries) GetRole(ctx context.Context, id int64) (Role, error) {
 }
 
 const listRoles = `-- name: ListRoles :many
-SELECT id, name, created_at, updated_at, deleted_at FROM roles ORDER BY id
+SELECT id, name, created_at, updated_at, deleted_at FROM roles WHERE deleted_at IS NULL ORDER BY id
 `
 
 func (q *Queries) ListRoles(ctx context.Context) ([]Role, error) {

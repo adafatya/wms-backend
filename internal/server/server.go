@@ -28,7 +28,7 @@ func NewServer(store sqlc.Store, logger *zap.Logger) *Server {
 
 	// Initial repository, service, and handler for users
 	userRepo := users.NewRepository(store)
-	userService := users.NewService(userRepo)
+	userService := users.NewService(userRepo, roleRepo)
 	userHandler := users.NewHandler(userService)
 
 	router.GET("/ping", func(c *gin.Context) {

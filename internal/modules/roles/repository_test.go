@@ -55,8 +55,7 @@ func TestRepository(t *testing.T) {
 		err := repo.DeleteRole(ctx, role.ID)
 		assert.NoError(t, err)
 
-		fetched, err := repo.GetRole(ctx, role.ID)
-		assert.NoError(t, err)
-		assert.NotNil(t, fetched.DeletedAt)
+		_, err = repo.GetRole(ctx, role.ID)
+		assert.Error(t, err)
 	})
 }

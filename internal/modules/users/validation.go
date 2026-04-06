@@ -16,6 +16,9 @@ func ValidateCreateUser(req *CreateUserRequest) error {
 	if len(req.Password) < 8 {
 		return errors.New("password must be at least 8 characters long")
 	}
+	if len(req.Password) > 72 {
+		return errors.New("password must not exceed 72 characters")
+	}
 	if strings.TrimSpace(req.FullName) == "" {
 		return errors.New("full name cannot be empty")
 	}

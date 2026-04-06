@@ -96,6 +96,18 @@ func TestValidateCreateUser(t *testing.T) {
 			wantErr: true,
 			errMsg:  "invalid role id",
 		},
+		{
+			name: "Password too long",
+			req: CreateUserRequest{
+				Username: "jdoe",
+				NIK:      "1234567890",
+				Password: string(make([]byte, 73)),
+				FullName: "John Doe",
+				RoleID:   1,
+			},
+			wantErr: true,
+			errMsg:  "password must not exceed 72 characters",
+		},
 	}
 
 	for _, tt := range tests {
