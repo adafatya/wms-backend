@@ -7,15 +7,63 @@ package sqlc
 
 import (
 	"context"
+	"database/sql"
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (username) VALUES ($1) RETURNING id, username, created_at
+INSERT INTO users (username, nik, password, full_name, role_id) 
+VALUES ($1, $2, $3, $4, $5) 
+RETURNING id, username, created_at, nik, password, full_name, role_id, updated_at, deleted_at
 `
 
-func (q *Queries) CreateUser(ctx context.Context, username string) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser, username)
+type CreateUserParams struct {
+	Username string         `json:"username"`
+	Nik      sql.NullString `json:"nik"`
+	Password sql.NullString `json:"password"`
+	FullName sql.NullString `json:"full_name"`
+	RoleID   sql.NullInt64  `json:"role_id"`
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, createUser,
+		arg.Username,
+		arg.Nik,
+		arg.Password,
+		arg.FullName,
+		arg.RoleID,
+	)
 	var i User
-	err := row.Scan(&i.ID, &i.Username, &i.CreatedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.CreatedAt,
+		&i.Nik,
+		&i.Password,
+		&i.FullName,
+		&i.RoleID,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const getUser = `-- name: GetUser :one
+SELECT id, username, created_at, nik, password, full_name, role_id, updated_at, deleted_at FROM users WHERE id = $1 LIMIT 1
+`
+
+func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUser, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.CreatedAt,
+		&i.Nik,
+		&i.Password,
+		&i.FullName,
+		&i.RoleID,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
 	return i, err
 }

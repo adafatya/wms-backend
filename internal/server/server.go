@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/adafatya/wms-backend/internal/db/sqlc"
+	"github.com/adafatya/wms-backend/internal/modules/roles"
 	"github.com/adafatya/wms-backend/internal/modules/users"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -20,6 +21,11 @@ func NewServer(store sqlc.Store, logger *zap.Logger) *Server {
 	}
 	router := gin.Default()
 
+	// Initial repository, service, and handler for roles
+	roleRepo := roles.NewRepository(store)
+	roleService := roles.NewService(roleRepo)
+	roleHandler := roles.NewHandler(roleService)
+
 	// Initial repository, service, and handler for users
 	userRepo := users.NewRepository(store)
 	userService := users.NewService(userRepo)
@@ -31,7 +37,8 @@ func NewServer(store sqlc.Store, logger *zap.Logger) *Server {
 		})
 	})
 
-	// User routes
+	// Register routes
+	roleHandler.RegisterRoutes(router)
 	userHandler.RegisterRoutes(router)
 
 	server.router = router

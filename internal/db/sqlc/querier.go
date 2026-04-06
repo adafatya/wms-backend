@@ -9,7 +9,13 @@ import (
 )
 
 type Querier interface {
-	CreateUser(ctx context.Context, username string) (User, error)
+	CreateRole(ctx context.Context, name string) (Role, error)
+	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	DeleteRole(ctx context.Context, id int64) error
+	GetRole(ctx context.Context, id int64) (Role, error)
+	GetUser(ctx context.Context, id int64) (User, error)
+	ListRoles(ctx context.Context) ([]Role, error)
+	UpdateRole(ctx context.Context, arg UpdateRoleParams) (Role, error)
 }
 
 var _ Querier = (*Queries)(nil)

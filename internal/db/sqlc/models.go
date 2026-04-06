@@ -5,11 +5,26 @@
 package sqlc
 
 import (
+	"database/sql"
 	"time"
 )
 
+type Role struct {
+	ID        int64        `json:"id"`
+	Name      string       `json:"name"`
+	CreatedAt time.Time    `json:"created_at"`
+	UpdatedAt time.Time    `json:"updated_at"`
+	DeletedAt sql.NullTime `json:"deleted_at"`
+}
+
 type User struct {
-	ID        int64     `json:"id"`
-	Username  string    `json:"username"`
-	CreatedAt time.Time `json:"created_at"`
+	ID        int64          `json:"id"`
+	Username  string         `json:"username"`
+	CreatedAt time.Time      `json:"created_at"`
+	Nik       sql.NullString `json:"nik"`
+	Password  sql.NullString `json:"password"`
+	FullName  sql.NullString `json:"full_name"`
+	RoleID    sql.NullInt64  `json:"role_id"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt sql.NullTime   `json:"deleted_at"`
 }
