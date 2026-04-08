@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/adafatya/wms-backend/internal/db/sqlc"
+	"github.com/adafatya/wms-backend/internal/models"
 	"github.com/adafatya/wms-backend/internal/modules/roles"
 	"github.com/adafatya/wms-backend/internal/modules/users"
 	"github.com/gin-gonic/gin"
@@ -32,8 +33,8 @@ func NewServer(store sqlc.Store, logger *zap.Logger) *Server {
 	userHandler := users.NewHandler(userService)
 
 	router.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
+		c.JSON(200, models.StandardResponse{
+			Message: "pong",
 		})
 	})
 

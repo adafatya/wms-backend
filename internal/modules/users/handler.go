@@ -26,7 +26,9 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 func (h *Handler) CreateUser(c *gin.Context) {
 	var req CreateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, models.StandardResponse{
+			Message: err.Error(),
+		})
 		return
 	}
 
