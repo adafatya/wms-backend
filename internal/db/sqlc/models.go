@@ -9,6 +9,34 @@ import (
 	"time"
 )
 
+type Inventory struct {
+	ProductID  int64        `json:"product_id"`
+	LocationID int64        `json:"location_id"`
+	Quantity   string       `json:"quantity"`
+	CreatedAt  time.Time    `json:"created_at"`
+	UpdatedAt  time.Time    `json:"updated_at"`
+	DeletedAt  sql.NullTime `json:"deleted_at"`
+}
+
+type Location struct {
+	ID        int64        `json:"id"`
+	Name      string       `json:"name"`
+	Code      string       `json:"code"`
+	CreatedAt time.Time    `json:"created_at"`
+	UpdatedAt time.Time    `json:"updated_at"`
+	DeletedAt sql.NullTime `json:"deleted_at"`
+}
+
+type Product struct {
+	ID        int64        `json:"id"`
+	Name      string       `json:"name"`
+	SkuCode   string       `json:"sku_code"`
+	Uom       string       `json:"uom"`
+	CreatedAt time.Time    `json:"created_at"`
+	UpdatedAt time.Time    `json:"updated_at"`
+	DeletedAt sql.NullTime `json:"deleted_at"`
+}
+
 type Role struct {
 	ID        int64        `json:"id"`
 	Name      string       `json:"name"`

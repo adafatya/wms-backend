@@ -73,8 +73,11 @@ func (h *Handler) GetRole(c *gin.Context) {
 }
 
 func (h *Handler) ListRoles(c *gin.Context) {
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	page, limit, err := models.ParsePaginationQuery(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.StandardResponse{Message: err.Error()})
+		return
+	}
 
 	roles, pagination, err := h.service.ListRoles(c.Request.Context(), page, limit)
 	if err != nil {
