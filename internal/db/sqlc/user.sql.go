@@ -10,6 +10,17 @@ import (
 	"database/sql"
 )
 
+const countUsers = `-- name: CountUsers :one
+SELECT COUNT(*) FROM users WHERE deleted_at IS NULL
+`
+
+func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countUsers)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (username, nik, password, full_name, role_id) 
 VALUES ($1, $2, $3, $4, $5) 
@@ -48,7 +59,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, username, created_at, nik, password, full_name, role_id, updated_at, deleted_at FROM users WHERE id = $1 AND deleted_at IS NULL LIMIT 1
+SELECT id, username, created_at, nik, password, full_name, role_id, updated_at, deleted_at FROM users WHERE id = $1 AND deleted_at IS NULL
 `
 
 func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
@@ -66,4 +77,46 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
 		&i.DeletedAt,
 	)
 	return i, err
+}
+
+const listUsers = `-- name: ListUsers :many
+SELECT id, username, created_at, nik, password, full_name, role_id, updated_at, deleted_at FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT $1 OFFSET $2
+`
+
+type ListUsersParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, listUsers, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Username,
+			&i.CreatedAt,
+			&i.Nik,
+			&i.Password,
+			&i.FullName,
+			&i.RoleID,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

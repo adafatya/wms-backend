@@ -10,7 +10,7 @@ import (
 )
 
 func TestRepository(t *testing.T) {
-	_, querier, cleanup := testutil.SetupTestDB(t)
+	db, querier, cleanup := testutil.SetupTestDB(t)
 	defer cleanup()
 
 	repo := NewRepository(querier)
@@ -34,5 +34,23 @@ func TestRepository(t *testing.T) {
 		assert.Equal(t, req.Username, user.Username)
 		assert.Equal(t, req.FullName, user.FullName)
 		assert.Equal(t, req.RoleID, user.RoleID)
+	})
+
+	t.Run("ListUsers", func(t *testing.T) {
+		// Truncate first to be sure
+		testutil.TruncateTables(db)
+		role, err := roleRepo.CreateRole(ctx, "Admin")
+		assert.NoError(t, err)
+
+		_, err = repo.CreateUser(ctx, CreateUserRequest{Username: "user1", NIK: "nik1", RoleID: role.ID})
+		assert.NoError(t, err)
+		_, err = repo.CreateUser(ctx, CreateUserRequest{Username: "user2", NIK: "nik2", RoleID: role.ID})
+		assert.NoError(t, err)
+
+		users, pagination, err := repo.ListUsers(ctx, 1, 10)
+		assert.NoError(t, err)
+		assert.Len(t, users, 2)
+		assert.NotNil(t, pagination)
+		assert.Equal(t, 1, pagination.TotalPage)
 	})
 }

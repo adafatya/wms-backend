@@ -9,12 +9,15 @@ import (
 )
 
 type Querier interface {
+	CountRoles(ctx context.Context) (int64, error)
+	CountUsers(ctx context.Context) (int64, error)
 	CreateRole(ctx context.Context, name string) (Role, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteRole(ctx context.Context, id int64) error
 	GetRole(ctx context.Context, id int64) (Role, error)
 	GetUser(ctx context.Context, id int64) (User, error)
-	ListRoles(ctx context.Context) ([]Role, error)
+	ListRoles(ctx context.Context, arg ListRolesParams) ([]Role, error)
+	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
 	UpdateRole(ctx context.Context, arg UpdateRoleParams) (Role, error)
 }
 

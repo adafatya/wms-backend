@@ -9,6 +9,17 @@ import (
 	"context"
 )
 
+const countRoles = `-- name: CountRoles :one
+SELECT COUNT(*) FROM roles WHERE deleted_at IS NULL
+`
+
+func (q *Queries) CountRoles(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countRoles)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createRole = `-- name: CreateRole :one
 INSERT INTO roles (name) VALUES ($1) RETURNING id, name, created_at, updated_at, deleted_at
 `
@@ -53,11 +64,16 @@ func (q *Queries) GetRole(ctx context.Context, id int64) (Role, error) {
 }
 
 const listRoles = `-- name: ListRoles :many
-SELECT id, name, created_at, updated_at, deleted_at FROM roles WHERE deleted_at IS NULL ORDER BY id
+SELECT id, name, created_at, updated_at, deleted_at FROM roles WHERE deleted_at IS NULL ORDER BY id LIMIT $1 OFFSET $2
 `
 
-func (q *Queries) ListRoles(ctx context.Context) ([]Role, error) {
-	rows, err := q.db.QueryContext(ctx, listRoles)
+type ListRolesParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListRoles(ctx context.Context, arg ListRolesParams) ([]Role, error) {
+	rows, err := q.db.QueryContext(ctx, listRoles, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

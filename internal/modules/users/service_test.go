@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/adafatya/wms-backend/internal/models"
 	"github.com/adafatya/wms-backend/internal/modules/roles"
 	"github.com/adafatya/wms-backend/pkg/utils"
 	"github.com/stretchr/testify/assert"
@@ -21,6 +22,16 @@ func (m *mockRepository) CreateUser(ctx context.Context, req CreateUserRequest) 
 	return args.Get(0).(User), args.Error(1)
 }
 
+func (m *mockRepository) ListUsers(ctx context.Context, page, limit int) ([]User, *models.Pagination, error) {
+	args := m.Called(ctx, page, limit)
+	return args.Get(0).([]User), args.Get(1).(*models.Pagination), args.Error(2)
+}
+
+func (m *mockRepository) CountUsers(ctx context.Context) (int64, error) {
+	args := m.Called(ctx)
+	return args.Get(0).(int64), args.Error(1)
+}
+
 type mockRoleRepository struct {
 	mock.Mock
 }
@@ -30,24 +41,29 @@ func (m *mockRoleRepository) CreateRole(ctx context.Context, name string) (roles
 	return args.Get(0).(roles.Role), args.Error(1)
 }
 
-func (m *mockRoleRepository) GetRole(ctx context.Context, id int64) (roles.Role, error) {
-	args := m.Called(ctx, id)
+func (m *mockRoleRepository) UpdateRole(ctx context.Context, id int64, name string) (roles.Role, error) {
+	args := m.Called(ctx, id, name)
 	return args.Get(0).(roles.Role), args.Error(1)
 }
 
-func (m *mockRoleRepository) ListRoles(ctx context.Context) ([]roles.Role, error) {
-	args := m.Called(ctx)
-	return args.Get(0).([]roles.Role), args.Error(1)
-}
-
-func (m *mockRoleRepository) UpdateRole(ctx context.Context, id int64, name string) (roles.Role, error) {
-	args := m.Called(ctx, id, name)
+func (m *mockRoleRepository) GetRole(ctx context.Context, id int64) (roles.Role, error) {
+	args := m.Called(ctx, id)
 	return args.Get(0).(roles.Role), args.Error(1)
 }
 
 func (m *mockRoleRepository) DeleteRole(ctx context.Context, id int64) error {
 	args := m.Called(ctx, id)
 	return args.Error(0)
+}
+
+func (m *mockRoleRepository) ListRoles(ctx context.Context, page, limit int) ([]roles.Role, *models.Pagination, error) {
+	args := m.Called(ctx, page, limit)
+	return args.Get(0).([]roles.Role), args.Get(1).(*models.Pagination), args.Error(2)
+}
+
+func (m *mockRoleRepository) CountRoles(ctx context.Context) (int64, error) {
+	args := m.Called(ctx)
+	return args.Get(0).(int64), args.Error(1)
 }
 
 func TestService_CreateUser(t *testing.T) {
