@@ -4,12 +4,14 @@ import (
 	"context"
 	"errors"
 
+	"github.com/adafatya/wms-backend/internal/models"
 	"github.com/adafatya/wms-backend/internal/modules/roles"
 	"github.com/adafatya/wms-backend/pkg/utils"
 )
 
 type Service interface {
 	CreateUser(ctx context.Context, req CreateUserRequest) (User, error)
+	ListUsers(ctx context.Context, page, limit int) ([]User, *models.Pagination, error)
 }
 
 type service struct {
@@ -42,4 +44,15 @@ func (s *service) CreateUser(ctx context.Context, req CreateUserRequest) (User, 
 	req.Password = hashedPassword
 
 	return s.repo.CreateUser(ctx, req)
+}
+
+func (s *service) ListUsers(ctx context.Context, page, limit int) ([]User, *models.Pagination, error) {
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 {
+		limit = 10
+	}
+
+	return s.repo.ListUsers(ctx, page, limit)
 }

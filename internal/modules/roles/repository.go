@@ -2,15 +2,18 @@ package roles
 
 import (
 	"context"
+	"math"
 	"time"
 
 	"github.com/adafatya/wms-backend/internal/db/sqlc"
+	"github.com/adafatya/wms-backend/internal/models"
 )
 
 type Repository interface {
 	CreateRole(ctx context.Context, name string) (Role, error)
 	GetRole(ctx context.Context, id int64) (Role, error)
-	ListRoles(ctx context.Context) ([]Role, error)
+	ListRoles(ctx context.Context, page, limit int) ([]Role, *models.Pagination, error)
+	CountRoles(ctx context.Context) (int64, error)
 	UpdateRole(ctx context.Context, id int64, name string) (Role, error)
 	DeleteRole(ctx context.Context, id int64) error
 }
@@ -41,16 +44,53 @@ func (r *repository) GetRole(ctx context.Context, id int64) (Role, error) {
 	return mapRole(row), nil
 }
 
-func (r *repository) ListRoles(ctx context.Context) ([]Role, error) {
-	rows, err := r.querier.ListRoles(ctx)
+func (r *repository) ListRoles(ctx context.Context, page, limit int) ([]Role, *models.Pagination, error) {
+	offset := (page - 1) * limit
+	arg := sqlc.ListRolesParams{
+		Limit:  int32(limit),
+		Offset: int32(offset),
+	}
+	rows, err := r.querier.ListRoles(ctx, arg)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	roles := make([]Role, len(rows))
 	for i, row := range rows {
 		roles[i] = mapRole(row)
 	}
-	return roles, nil
+
+	totalData, err := r.querier.CountRoles(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	totalPage := int(math.Ceil(float64(totalData) / float64(limit)))
+
+	var prevPage *int
+	if page > 1 {
+		p := page - 1
+		prevPage = &p
+	}
+
+	var nextPage *int
+	if page < totalPage {
+		n := page + 1
+		nextPage = &n
+	}
+
+	pagination := &models.Pagination{
+		Page:      page,
+		Limit:     limit,
+		PrevPage:  prevPage,
+		NextPage:  nextPage,
+		TotalPage: totalPage,
+	}
+
+	return roles, pagination, nil
+}
+
+func (r *repository) CountRoles(ctx context.Context) (int64, error) {
+	return r.querier.CountRoles(ctx)
 }
 
 func (r *repository) UpdateRole(ctx context.Context, id int64, name string) (Role, error) {

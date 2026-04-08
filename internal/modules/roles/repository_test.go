@@ -36,9 +36,11 @@ func TestRepository(t *testing.T) {
 		repo.CreateRole(ctx, "Role 1")
 		repo.CreateRole(ctx, "Role 2")
 
-		roles, err := repo.ListRoles(ctx)
+		roles, pagination, err := repo.ListRoles(ctx, 1, 10)
 		assert.NoError(t, err)
 		assert.Len(t, roles, 2)
+		assert.NotNil(t, pagination)
+		assert.Equal(t, 1, pagination.TotalPage)
 	})
 
 	t.Run("UpdateRole", func(t *testing.T) {

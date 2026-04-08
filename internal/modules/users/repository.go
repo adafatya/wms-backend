@@ -3,13 +3,17 @@ package users
 import (
 	"context"
 	"database/sql"
+	"math"
 	"time"
 
 	"github.com/adafatya/wms-backend/internal/db/sqlc"
+	"github.com/adafatya/wms-backend/internal/models"
 )
 
 type Repository interface {
 	CreateUser(ctx context.Context, req CreateUserRequest) (User, error)
+	ListUsers(ctx context.Context, page, limit int) ([]User, *models.Pagination, error)
+	CountUsers(ctx context.Context) (int64, error)
 }
 
 type repository struct {
@@ -36,6 +40,56 @@ func (r *repository) CreateUser(ctx context.Context, req CreateUserRequest) (Use
 	}
 
 	return mapUser(u), nil
+}
+
+func (r *repository) ListUsers(ctx context.Context, page, limit int) ([]User, *models.Pagination, error) {
+	offset := (page - 1) * limit
+	arg := sqlc.ListUsersParams{
+		Limit:  int32(limit),
+		Offset: int32(offset),
+	}
+	rows, err := r.querier.ListUsers(ctx, arg)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	users := make([]User, len(rows))
+	for i, u := range rows {
+		users[i] = mapUser(u)
+	}
+
+	totalData, err := r.querier.CountUsers(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	totalPage := int(math.Ceil(float64(totalData) / float64(limit)))
+
+	var prevPage *int
+	if page > 1 {
+		p := page - 1
+		prevPage = &p
+	}
+
+	var nextPage *int
+	if page < totalPage {
+		n := page + 1
+		nextPage = &n
+	}
+
+	pagination := &models.Pagination{
+		Page:      page,
+		Limit:     limit,
+		PrevPage:  prevPage,
+		NextPage:  nextPage,
+		TotalPage: totalPage,
+	}
+
+	return users, pagination, nil
+}
+
+func (r *repository) CountUsers(ctx context.Context) (int64, error) {
+	return r.querier.CountUsers(ctx)
 }
 
 func mapUser(u sqlc.User) User {

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/adafatya/wms-backend/internal/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -24,9 +25,14 @@ func (m *mockRepository) GetRole(ctx context.Context, id int64) (Role, error) {
 	return args.Get(0).(Role), args.Error(1)
 }
 
-func (m *mockRepository) ListRoles(ctx context.Context) ([]Role, error) {
+func (m *mockRepository) ListRoles(ctx context.Context, page, limit int) ([]Role, *models.Pagination, error) {
+	args := m.Called(ctx, page, limit)
+	return args.Get(0).([]Role), args.Get(1).(*models.Pagination), args.Error(2)
+}
+
+func (m *mockRepository) CountRoles(ctx context.Context) (int64, error) {
 	args := m.Called(ctx)
-	return args.Get(0).([]Role), args.Error(1)
+	return args.Get(0).(int64), args.Error(1)
 }
 
 func (m *mockRepository) UpdateRole(ctx context.Context, id int64, name string) (Role, error) {
