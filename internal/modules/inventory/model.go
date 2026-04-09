@@ -41,9 +41,9 @@ type CreateProductRequest struct {
 }
 
 type UpdateProductRequest struct {
-	Name      string           `json:"name"`
-	SKUCode   string           `json:"sku_code"`
-	UOM       string           `json:"uom"`
+	Name      string           `json:"name" binding:"required"`
+	SKUCode   string           `json:"sku_code" binding:"required"`
+	UOM       string           `json:"uom" binding:"required"`
 	Inventory []InventoryInput `json:"inventory"`
 }
 
@@ -81,8 +81,8 @@ type CreateLocationRequest struct {
 }
 
 type UpdateLocationRequest struct {
-	Name      string           `json:"name"`
-	Code      string           `json:"code"`
+	Name      string           `json:"name" binding:"required"`
+	Code      string           `json:"code" binding:"required"`
 	Inventory []InventoryInput `json:"inventory"`
 }
 

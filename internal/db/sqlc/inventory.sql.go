@@ -124,26 +124,24 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 	return i, err
 }
 
-const deleteLocation = `-- name: DeleteLocation :exec
+const deleteLocation = `-- name: DeleteLocation :execresult
 UPDATE locations
 SET deleted_at = now()
-WHERE id = $1
+WHERE id = $1 AND deleted_at IS NULL
 `
 
-func (q *Queries) DeleteLocation(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, deleteLocation, id)
-	return err
+func (q *Queries) DeleteLocation(ctx context.Context, id int64) (sql.Result, error) {
+	return q.db.ExecContext(ctx, deleteLocation, id)
 }
 
-const deleteProduct = `-- name: DeleteProduct :exec
+const deleteProduct = `-- name: DeleteProduct :execresult
 UPDATE products
 SET deleted_at = now()
-WHERE id = $1
+WHERE id = $1 AND deleted_at IS NULL
 `
 
-func (q *Queries) DeleteProduct(ctx context.Context, id int64) error {
-	_, err := q.db.ExecContext(ctx, deleteProduct, id)
-	return err
+func (q *Queries) DeleteProduct(ctx context.Context, id int64) (sql.Result, error) {
+	return q.db.ExecContext(ctx, deleteProduct, id)
 }
 
 const getInventoriesByLocation = `-- name: GetInventoriesByLocation :many

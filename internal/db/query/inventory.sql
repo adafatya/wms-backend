@@ -25,10 +25,10 @@ SET name = $2, sku_code = $3, uom = $4, updated_at = now()
 WHERE id = $1 AND deleted_at IS NULL
 RETURNING *;
 
--- name: DeleteProduct :exec
+-- name: DeleteProduct :execresult
 UPDATE products
 SET deleted_at = now()
-WHERE id = $1;
+WHERE id = $1 AND deleted_at IS NULL;
 
 -- name: CreateLocation :one
 INSERT INTO locations (name, code)
@@ -57,10 +57,10 @@ SET name = $2, code = $3, updated_at = now()
 WHERE id = $1 AND deleted_at IS NULL
 RETURNING *;
 
--- name: DeleteLocation :exec
+-- name: DeleteLocation :execresult
 UPDATE locations
 SET deleted_at = now()
-WHERE id = $1;
+WHERE id = $1 AND deleted_at IS NULL;
 
 -- name: BulkUpsertInventories :exec
 INSERT INTO inventories (product_id, location_id, quantity, updated_at)

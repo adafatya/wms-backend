@@ -6,6 +6,7 @@ package sqlc
 
 import (
 	"context"
+	"database/sql"
 )
 
 type Querier interface {
@@ -19,8 +20,8 @@ type Querier interface {
 	CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error)
 	CreateRole(ctx context.Context, name string) (Role, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
-	DeleteLocation(ctx context.Context, id int64) error
-	DeleteProduct(ctx context.Context, id int64) error
+	DeleteLocation(ctx context.Context, id int64) (sql.Result, error)
+	DeleteProduct(ctx context.Context, id int64) (sql.Result, error)
 	DeleteRole(ctx context.Context, id int64) error
 	GetInventoriesByLocation(ctx context.Context, locationID int64) ([]GetInventoriesByLocationRow, error)
 	GetInventoriesByProduct(ctx context.Context, productID int64) ([]GetInventoriesByProductRow, error)

@@ -45,18 +45,16 @@ func ValidateCreateProduct(req *CreateProductRequest) error {
 }
 
 func ValidateUpdateProduct(req *UpdateProductRequest) error {
-	if req.Name != "" && strings.TrimSpace(req.Name) == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return errors.New("product name cannot be empty")
 	}
-	if req.SKUCode != "" {
-		if strings.TrimSpace(req.SKUCode) == "" {
-			return errors.New("sku code cannot be empty")
-		}
-		if !isValidCode(req.SKUCode) {
-			return errors.New("sku code can only contain capital letters, numbers, and dashes")
-		}
+	if strings.TrimSpace(req.SKUCode) == "" {
+		return errors.New("sku code cannot be empty")
 	}
-	if req.UOM != "" && strings.TrimSpace(req.UOM) == "" {
+	if !isValidCode(req.SKUCode) {
+		return errors.New("sku code can only contain capital letters, numbers, and dashes")
+	}
+	if strings.TrimSpace(req.UOM) == "" {
 		return errors.New("uom cannot be empty")
 	}
 
@@ -97,16 +95,14 @@ func ValidateCreateLocation(req *CreateLocationRequest) error {
 }
 
 func ValidateUpdateLocation(req *UpdateLocationRequest) error {
-	if req.Name != "" && strings.TrimSpace(req.Name) == "" {
+	if strings.TrimSpace(req.Name) == "" {
 		return errors.New("location name cannot be empty")
 	}
-	if req.Code != "" {
-		if strings.TrimSpace(req.Code) == "" {
-			return errors.New("location code cannot be empty")
-		}
-		if !isValidCode(req.Code) {
-			return errors.New("location code can only contain capital letters, numbers, and dashes")
-		}
+	if strings.TrimSpace(req.Code) == "" {
+		return errors.New("location code cannot be empty")
+	}
+	if !isValidCode(req.Code) {
+		return errors.New("location code can only contain capital letters, numbers, and dashes")
 	}
 
 	for _, inv := range req.Inventory {

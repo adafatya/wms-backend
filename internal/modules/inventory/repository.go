@@ -110,7 +110,18 @@ func (r *repository) UpdateProduct(ctx context.Context, id int64, req UpdateProd
 }
 
 func (r *repository) DeleteProduct(ctx context.Context, id int64) error {
-	return r.querier.DeleteProduct(ctx, id)
+	res, err := r.querier.DeleteProduct(ctx, id)
+	if err != nil {
+		return err
+	}
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
 }
 
 // Location implementations
@@ -171,7 +182,18 @@ func (r *repository) UpdateLocation(ctx context.Context, id int64, req UpdateLoc
 }
 
 func (r *repository) DeleteLocation(ctx context.Context, id int64) error {
-	return r.querier.DeleteLocation(ctx, id)
+	res, err := r.querier.DeleteLocation(ctx, id)
+	if err != nil {
+		return err
+	}
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
 }
 
 // Inventory implementations

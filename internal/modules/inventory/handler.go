@@ -1,6 +1,7 @@
 package inventory
 
 import (
+	"database/sql"
 	"net/http"
 	"strconv"
 
@@ -132,6 +133,10 @@ func (h *Handler) DeleteLocation(c *gin.Context) {
 	}
 
 	if err := h.service.DeleteLocation(c.Request.Context(), id); err != nil {
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusNotFound, models.StandardResponse{Message: "Location not found"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, models.StandardResponse{Message: err.Error()})
 		return
 	}
@@ -232,6 +237,10 @@ func (h *Handler) DeleteProduct(c *gin.Context) {
 	}
 
 	if err := h.service.DeleteProduct(c.Request.Context(), id); err != nil {
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusNotFound, models.StandardResponse{Message: "Product not found"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, models.StandardResponse{Message: err.Error()})
 		return
 	}
