@@ -2,7 +2,6 @@ package users
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/adafatya/wms-backend/internal/models"
 	"github.com/gin-gonic/gin"
@@ -47,8 +46,11 @@ func (h *Handler) CreateUser(c *gin.Context) {
 }
 
 func (h *Handler) ListUsers(c *gin.Context) {
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	page, limit, err := models.ParsePaginationQuery(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.StandardResponse{Message: err.Error()})
+		return
+	}
 
 	users, pagination, err := h.service.ListUsers(c.Request.Context(), page, limit)
 	if err != nil {

@@ -6,18 +6,37 @@ package sqlc
 
 import (
 	"context"
+	"database/sql"
 )
 
 type Querier interface {
+	BulkUpsertInventories(ctx context.Context, arg BulkUpsertInventoriesParams) error
+	CountInventories(ctx context.Context) (int64, error)
+	CountLocations(ctx context.Context, name string) (int64, error)
+	CountProducts(ctx context.Context, name string) (int64, error)
 	CountRoles(ctx context.Context) (int64, error)
 	CountUsers(ctx context.Context) (int64, error)
+	CreateLocation(ctx context.Context, arg CreateLocationParams) (Location, error)
+	CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error)
 	CreateRole(ctx context.Context, name string) (Role, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	DeleteLocation(ctx context.Context, id int64) (sql.Result, error)
+	DeleteProduct(ctx context.Context, id int64) (sql.Result, error)
 	DeleteRole(ctx context.Context, id int64) error
+	GetInventoriesByLocation(ctx context.Context, locationID int64) ([]GetInventoriesByLocationRow, error)
+	GetInventoriesByProduct(ctx context.Context, productID int64) ([]GetInventoriesByProductRow, error)
+	GetInventoryStock(ctx context.Context, arg GetInventoryStockParams) (string, error)
+	GetLocation(ctx context.Context, id int64) (Location, error)
+	GetProduct(ctx context.Context, id int64) (Product, error)
 	GetRole(ctx context.Context, id int64) (Role, error)
 	GetUser(ctx context.Context, id int64) (User, error)
+	ListInventories(ctx context.Context, arg ListInventoriesParams) ([]ListInventoriesRow, error)
+	ListLocations(ctx context.Context, arg ListLocationsParams) ([]Location, error)
+	ListProducts(ctx context.Context, arg ListProductsParams) ([]Product, error)
 	ListRoles(ctx context.Context, arg ListRolesParams) ([]Role, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
+	UpdateLocation(ctx context.Context, arg UpdateLocationParams) (Location, error)
+	UpdateProduct(ctx context.Context, arg UpdateProductParams) (Product, error)
 	UpdateRole(ctx context.Context, arg UpdateRoleParams) (Role, error)
 }
 

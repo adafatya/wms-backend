@@ -3,7 +3,6 @@ package users
 import (
 	"context"
 	"database/sql"
-	"math"
 	"time"
 
 	"github.com/adafatya/wms-backend/internal/db/sqlc"
@@ -63,27 +62,7 @@ func (r *repository) ListUsers(ctx context.Context, page, limit int) ([]User, *m
 		return nil, nil, err
 	}
 
-	totalPage := int(math.Ceil(float64(totalData) / float64(limit)))
-
-	var prevPage *int
-	if page > 1 {
-		p := page - 1
-		prevPage = &p
-	}
-
-	var nextPage *int
-	if page < totalPage {
-		n := page + 1
-		nextPage = &n
-	}
-
-	pagination := &models.Pagination{
-		Page:      page,
-		Limit:     limit,
-		PrevPage:  prevPage,
-		NextPage:  nextPage,
-		TotalPage: totalPage,
-	}
+	pagination := models.NewPagination(page, limit, totalData)
 
 	return users, pagination, nil
 }
