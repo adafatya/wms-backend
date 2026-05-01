@@ -11,8 +11,14 @@ import (
 
 type Querier interface {
 	BulkAddInventories(ctx context.Context, arg BulkAddInventoriesParams) error
+	BulkCreateDeliveryItems(ctx context.Context, arg BulkCreateDeliveryItemsParams) error
+	BulkCreateDeliveryOrderItems(ctx context.Context, arg BulkCreateDeliveryOrderItemsParams) error
 	BulkCreateProductReceiptItems(ctx context.Context, arg BulkCreateProductReceiptItemsParams) error
+	BulkDeductInventories(ctx context.Context, arg BulkDeductInventoriesParams) error
 	BulkUpsertInventories(ctx context.Context, arg BulkUpsertInventoriesParams) error
+	CountCustomers(ctx context.Context) (int64, error)
+	CountDeliveries(ctx context.Context) (int64, error)
+	CountDeliveryOrders(ctx context.Context) (int64, error)
 	CountIncomingSchedules(ctx context.Context) (int64, error)
 	CountInventories(ctx context.Context) (int64, error)
 	CountLocations(ctx context.Context, name string) (int64, error)
@@ -20,17 +26,29 @@ type Querier interface {
 	CountProducts(ctx context.Context, name string) (int64, error)
 	CountRoles(ctx context.Context) (int64, error)
 	CountUsers(ctx context.Context) (int64, error)
+	CreateCustomer(ctx context.Context, arg CreateCustomerParams) (Customer, error)
+	CreateDelivery(ctx context.Context, arg CreateDeliveryParams) (Delivery, error)
+	CreateDeliveryOrder(ctx context.Context, arg CreateDeliveryOrderParams) (DeliveryOrder, error)
 	CreateIncomingSchedule(ctx context.Context, arg CreateIncomingScheduleParams) (IncomingSchedule, error)
 	CreateLocation(ctx context.Context, arg CreateLocationParams) (Location, error)
 	CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error)
 	CreateProductReceipt(ctx context.Context, arg CreateProductReceiptParams) (ProductReceipt, error)
 	CreateRole(ctx context.Context, name string) (Role, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	DeleteCustomer(ctx context.Context, id int64) (sql.Result, error)
+	DeleteDelivery(ctx context.Context, id int64) (sql.Result, error)
+	DeleteDeliveryOrder(ctx context.Context, id int64) (sql.Result, error)
+	DeleteDeliveryOrderItems(ctx context.Context, deliveryOrderID int64) error
 	DeleteIncomingSchedule(ctx context.Context, id int64) (sql.Result, error)
 	DeleteIncomingScheduleItems(ctx context.Context, incomingScheduleID int64) error
 	DeleteLocation(ctx context.Context, id int64) (sql.Result, error)
 	DeleteProduct(ctx context.Context, id int64) (sql.Result, error)
 	DeleteRole(ctx context.Context, id int64) error
+	GetCustomer(ctx context.Context, id int64) (Customer, error)
+	GetDelivery(ctx context.Context, id int64) (GetDeliveryRow, error)
+	GetDeliveryItems(ctx context.Context, deliveryID int64) ([]GetDeliveryItemsRow, error)
+	GetDeliveryOrder(ctx context.Context, id int64) (GetDeliveryOrderRow, error)
+	GetDeliveryOrderItems(ctx context.Context, deliveryOrderID int64) ([]GetDeliveryOrderItemsRow, error)
 	GetIncomingSchedule(ctx context.Context, id int64) (IncomingSchedule, error)
 	GetIncomingScheduleItems(ctx context.Context, incomingScheduleID int64) ([]GetIncomingScheduleItemsRow, error)
 	GetInventoriesByLocation(ctx context.Context, locationID int64) ([]GetInventoriesByLocationRow, error)
@@ -42,8 +60,12 @@ type Querier interface {
 	GetProductReceiptItems(ctx context.Context, productReceiptID int64) ([]GetProductReceiptItemsRow, error)
 	GetRole(ctx context.Context, id int64) (Role, error)
 	GetUser(ctx context.Context, id int64) (User, error)
+	IncrementDeliveryOrderItemDeliveredQty(ctx context.Context, arg IncrementDeliveryOrderItemDeliveredQtyParams) error
 	IncrementScheduleItemReceivedQuantity(ctx context.Context, arg IncrementScheduleItemReceivedQuantityParams) error
 	IncrementScheduleReceivedQuantity(ctx context.Context, arg IncrementScheduleReceivedQuantityParams) error
+	ListCustomers(ctx context.Context, arg ListCustomersParams) ([]Customer, error)
+	ListDeliveries(ctx context.Context, arg ListDeliveriesParams) ([]ListDeliveriesRow, error)
+	ListDeliveryOrders(ctx context.Context, arg ListDeliveryOrdersParams) ([]ListDeliveryOrdersRow, error)
 	ListIncomingSchedules(ctx context.Context, arg ListIncomingSchedulesParams) ([]IncomingSchedule, error)
 	ListInventories(ctx context.Context, arg ListInventoriesParams) ([]ListInventoriesRow, error)
 	ListLocations(ctx context.Context, arg ListLocationsParams) ([]Location, error)
@@ -51,10 +73,15 @@ type Querier interface {
 	ListProducts(ctx context.Context, arg ListProductsParams) ([]Product, error)
 	ListRoles(ctx context.Context, arg ListRolesParams) ([]Role, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
+	UpdateCustomer(ctx context.Context, arg UpdateCustomerParams) (Customer, error)
+	UpdateDelivery(ctx context.Context, arg UpdateDeliveryParams) (Delivery, error)
+	UpdateDeliveryOrder(ctx context.Context, arg UpdateDeliveryOrderParams) (DeliveryOrder, error)
+	UpdateDeliveryOrderStatus(ctx context.Context, arg UpdateDeliveryOrderStatusParams) (DeliveryOrder, error)
 	UpdateIncomingSchedule(ctx context.Context, arg UpdateIncomingScheduleParams) (IncomingSchedule, error)
 	UpdateLocation(ctx context.Context, arg UpdateLocationParams) (Location, error)
 	UpdateProduct(ctx context.Context, arg UpdateProductParams) (Product, error)
 	UpdateRole(ctx context.Context, arg UpdateRoleParams) (Role, error)
+	UpsertDeliveryOrderItem(ctx context.Context, arg UpsertDeliveryOrderItemParams) (DeliveryOrderItem, error)
 	UpsertIncomingScheduleItem(ctx context.Context, arg UpsertIncomingScheduleItemParams) (IncomingScheduleItem, error)
 }
 

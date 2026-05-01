@@ -9,6 +9,63 @@ import (
 	"time"
 )
 
+type Customer struct {
+	ID          int64          `json:"id"`
+	Name        string         `json:"name"`
+	Address     string         `json:"address"`
+	ContactName sql.NullString `json:"contact_name"`
+	ContactInfo sql.NullString `json:"contact_info"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	DeletedAt   sql.NullTime   `json:"deleted_at"`
+}
+
+type Delivery struct {
+	ID              int64          `json:"id"`
+	DeliveryOrderID int64          `json:"delivery_order_id"`
+	UserID          int64          `json:"user_id"`
+	LocationID      int64          `json:"location_id"`
+	DeliveredAt     time.Time      `json:"delivered_at"`
+	VehicleNumber   sql.NullString `json:"vehicle_number"`
+	Note            sql.NullString `json:"note"`
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+	DeletedAt       sql.NullTime   `json:"deleted_at"`
+}
+
+type DeliveryItem struct {
+	ID         int64        `json:"id"`
+	DeliveryID int64        `json:"delivery_id"`
+	ProductID  int64        `json:"product_id"`
+	Quantity   string       `json:"quantity"`
+	CreatedAt  time.Time    `json:"created_at"`
+	UpdatedAt  time.Time    `json:"updated_at"`
+	DeletedAt  sql.NullTime `json:"deleted_at"`
+}
+
+type DeliveryOrder struct {
+	ID           int64          `json:"id"`
+	CustomerID   int64          `json:"customer_id"`
+	OrderNumber  string         `json:"order_number"`
+	DeliveryDate time.Time      `json:"delivery_date"`
+	Status       string         `json:"status"`
+	Note         sql.NullString `json:"note"`
+	CreatedAt    time.Time      `json:"created_at"`
+	UpdatedAt    time.Time      `json:"updated_at"`
+	DeletedAt    sql.NullTime   `json:"deleted_at"`
+}
+
+type DeliveryOrderItem struct {
+	ID                int64        `json:"id"`
+	DeliveryOrderID   int64        `json:"delivery_order_id"`
+	ProductID         int64        `json:"product_id"`
+	Quantity          string       `json:"quantity"`
+	DeliveredQuantity string       `json:"delivered_quantity"`
+	CreatedAt         time.Time    `json:"created_at"`
+	UpdatedAt         time.Time    `json:"updated_at"`
+	DeletedAt         sql.NullTime `json:"deleted_at"`
+}
+
 type IncomingSchedule struct {
 	ID               int64          `json:"id"`
 	LocationID       int64          `json:"location_id"`
