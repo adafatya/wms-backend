@@ -74,8 +74,7 @@ WHERE id = $1 AND deleted_at IS NULL;
 INSERT INTO delivery_order_items (
   delivery_order_id, product_id, quantity
 )
-SELECT $1, unnest($2::bigint[]), unnest($3::numeric[])
-RETURNING *;
+SELECT $1, unnest($2::bigint[]), unnest($3::numeric[]);
 
 -- name: GetDeliveryOrderItems :many
 SELECT doi.*, p.name as product_name, p.sku_code as product_sku_code, p.uom as product_uom
@@ -146,8 +145,7 @@ WHERE id = $1 AND deleted_at IS NULL;
 INSERT INTO delivery_items (
   delivery_id, product_id, quantity
 )
-SELECT $1, unnest($2::bigint[]), unnest($3::numeric[])
-RETURNING *;
+SELECT $1, unnest($2::bigint[]), unnest($3::numeric[]);
 
 -- name: GetDeliveryItems :many
 SELECT di.*, p.name as product_name, p.sku_code as product_sku_code, p.uom as product_uom

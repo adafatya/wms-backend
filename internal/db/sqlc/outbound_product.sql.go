@@ -18,7 +18,6 @@ INSERT INTO delivery_items (
   delivery_id, product_id, quantity
 )
 SELECT $1, unnest($2::bigint[]), unnest($3::numeric[])
-RETURNING id, delivery_id, product_id, quantity, created_at, updated_at, deleted_at
 `
 
 type BulkCreateDeliveryItemsParams struct {
@@ -37,7 +36,6 @@ INSERT INTO delivery_order_items (
   delivery_order_id, product_id, quantity
 )
 SELECT $1, unnest($2::bigint[]), unnest($3::numeric[])
-RETURNING id, delivery_order_id, product_id, quantity, delivered_quantity, created_at, updated_at, deleted_at
 `
 
 type BulkCreateDeliveryOrderItemsParams struct {
