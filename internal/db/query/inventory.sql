@@ -76,6 +76,13 @@ ON CONFLICT (product_id, location_id) DO UPDATE SET
   quantity = inventories.quantity + EXCLUDED.quantity,
   updated_at = now();
 
+-- name: BulkDeductInventories :exec
+INSERT INTO inventories (product_id, location_id, quantity, updated_at)
+SELECT unnest(@product_ids::bigint[]), unnest(@location_ids::bigint[]), unnest(@quantities::numeric[]), now()
+ON CONFLICT (product_id, location_id) DO UPDATE SET
+  quantity = inventories.quantity - EXCLUDED.quantity,
+  updated_at = now();
+
 -- name: GetInventoriesByLocation :many
 SELECT i.*, p.name as product_name, p.sku_code as product_sku_code, p.uom as product_uom
 FROM inventories i

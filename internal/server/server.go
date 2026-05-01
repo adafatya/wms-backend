@@ -7,6 +7,7 @@ import (
 	"github.com/adafatya/wms-backend/internal/modules/users"
 	"github.com/adafatya/wms-backend/internal/modules/inventory"
 	"github.com/adafatya/wms-backend/internal/modules/inboundproduct"
+	"github.com/adafatya/wms-backend/internal/modules/outboundproduct"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -44,6 +45,11 @@ func NewServer(store sqlc.Store, logger *zap.Logger) *Server {
 	inboundService := inboundproduct.NewService(inboundRepo, store)
 	inboundHandler := inboundproduct.NewHandler(inboundService)
 
+	// Initial repository, service, and handler for outbound product
+	outboundRepo := outboundproduct.NewRepository(store)
+	outboundService := outboundproduct.NewService(outboundRepo, store)
+	outboundHandler := outboundproduct.NewHandler(outboundService)
+
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, models.StandardResponse{
 			Message: "pong",
@@ -55,6 +61,7 @@ func NewServer(store sqlc.Store, logger *zap.Logger) *Server {
 	userHandler.RegisterRoutes(router)
 	inventoryHandler.RegisterRoutes(router)
 	inboundHandler.RegisterRoutes(router)
+	outboundHandler.RegisterRoutes(router)
 
 	server.router = router
 	return server
