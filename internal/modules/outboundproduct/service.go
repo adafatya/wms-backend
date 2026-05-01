@@ -169,16 +169,33 @@ func (s *service) UpdateDeliveryOrder(ctx context.Context, id int64, req UpdateD
 		}
 
 		// Reconciliation
+		// Fetch existing items to preserve delivered_quantity
+		existingItems, err := txRepo.GetDeliveryOrderItems(ctx, id)
+		if err != nil {
+			return err
+		}
+		deliveredQtyMap := make(map[int64]decimal.Decimal)
+		for _, item := range existingItems {
+			deliveredQtyMap[item.ProductID] = item.DeliveredQuantity
+		}
+
 		if err := txRepo.DeleteDeliveryOrderItems(ctx, id); err != nil {
 			return err
 		}
 
 		for _, item := range req.Items {
+			deliveredQty := decimal.Zero
+			if item.DeliveredQuantity != nil {
+				deliveredQty = *item.DeliveredQuantity
+			} else if dq, ok := deliveredQtyMap[item.ProductID]; ok {
+				deliveredQty = dq
+			}
+
 			_, err := txRepo.UpsertDeliveryOrderItem(ctx, sqlc.UpsertDeliveryOrderItemParams{
 				DeliveryOrderID:   id,
 				ProductID:         item.ProductID,
 				Quantity:          item.Quantity.String(),
-				DeliveredQuantity: item.DeliveredQuantity.String(),
+				DeliveredQuantity: deliveredQty.String(),
 			})
 			if err != nil {
 				return err
@@ -211,7 +228,23 @@ func (s *service) CreateDelivery(ctx context.Context, req CreateDeliveryRequest)
 	err := s.store.ExecTx(ctx, func(q sqlc.Querier) error {
 		txRepo := s.repo.WithTx(q)
 
-		// 1. Stock Check
+		// 1. Validate Items exist in Delivery Order
+		doItems, err := txRepo.GetDeliveryOrderItems(ctx, req.DeliveryOrderID)
+		if err != nil {
+			return err
+		}
+		doProductIDs := make(map[int64]bool)
+		for _, doi := range doItems {
+			doProductIDs[doi.ProductID] = true
+		}
+
+		for _, item := range req.Items {
+			if !doProductIDs[item.ProductID] {
+				return fmt.Errorf("product ID %d is not in the delivery order", item.ProductID)
+			}
+		}
+
+		// 2. Stock Check
 		for _, item := range req.Items {
 			stock, err := txRepo.GetInventoryStock(ctx, sqlc.GetInventoryStockParams{
 				ProductID:  item.ProductID,
@@ -277,7 +310,7 @@ func (s *service) CreateDelivery(ctx context.Context, req CreateDeliveryRequest)
 
 		// 6. Update Delivery Order Status
 		// Check if all items delivered
-		doItems, err := txRepo.GetDeliveryOrderItems(ctx, req.DeliveryOrderID)
+		doItems, err = txRepo.GetDeliveryOrderItems(ctx, req.DeliveryOrderID)
 		if err != nil {
 			return err
 		}

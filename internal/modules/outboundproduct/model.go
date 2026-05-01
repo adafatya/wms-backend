@@ -66,7 +66,7 @@ type UpdateDeliveryOrderRequest struct {
 type UpdateDeliveryOrderItem struct {
 	ProductID         int64           `json:"product_id" binding:"required"`
 	Quantity          decimal.Decimal `json:"quantity" binding:"required"`
-	DeliveredQuantity decimal.Decimal `json:"delivered_quantity"`
+	DeliveredQuantity *decimal.Decimal `json:"delivered_quantity"`
 }
 
 type DeliveryOrder struct {

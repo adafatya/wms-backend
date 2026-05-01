@@ -64,6 +64,17 @@ func ValidateUpdateDeliveryOrder(req UpdateDeliveryOrderRequest) error {
 	if req.Status == "" {
 		return fmt.Errorf("status is required")
 	}
+
+	validStatuses := map[string]bool{
+		StatusPending:    true,
+		StatusProcessing: true,
+		StatusShipped:    true,
+		StatusCancelled:  true,
+		StatusCompleted:  true,
+	}
+	if !validStatuses[req.Status] {
+		return fmt.Errorf("invalid status: %s", req.Status)
+	}
 	if len(req.Items) == 0 {
 		return fmt.Errorf("at least one item is required")
 	}
