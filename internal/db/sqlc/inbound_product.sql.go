@@ -334,6 +334,41 @@ func (q *Queries) GetProductReceiptItems(ctx context.Context, productReceiptID i
 	return items, nil
 }
 
+const incrementScheduleItemReceivedQuantity = `-- name: IncrementScheduleItemReceivedQuantity :exec
+UPDATE incoming_schedule_items
+SET received_quantity = received_quantity + $3,
+    updated_at = now()
+WHERE incoming_schedule_id = $1 AND product_id = $2 AND deleted_at IS NULL
+`
+
+type IncrementScheduleItemReceivedQuantityParams struct {
+	IncomingScheduleID int64  `json:"incoming_schedule_id"`
+	ProductID          int64  `json:"product_id"`
+	ReceivedQuantity   string `json:"received_quantity"`
+}
+
+func (q *Queries) IncrementScheduleItemReceivedQuantity(ctx context.Context, arg IncrementScheduleItemReceivedQuantityParams) error {
+	_, err := q.db.ExecContext(ctx, incrementScheduleItemReceivedQuantity, arg.IncomingScheduleID, arg.ProductID, arg.ReceivedQuantity)
+	return err
+}
+
+const incrementScheduleReceivedQuantity = `-- name: IncrementScheduleReceivedQuantity :exec
+UPDATE incoming_schedules
+SET received_quantity = received_quantity + $2,
+    updated_at = now()
+WHERE id = $1 AND deleted_at IS NULL
+`
+
+type IncrementScheduleReceivedQuantityParams struct {
+	ID               int64  `json:"id"`
+	ReceivedQuantity string `json:"received_quantity"`
+}
+
+func (q *Queries) IncrementScheduleReceivedQuantity(ctx context.Context, arg IncrementScheduleReceivedQuantityParams) error {
+	_, err := q.db.ExecContext(ctx, incrementScheduleReceivedQuantity, arg.ID, arg.ReceivedQuantity)
+	return err
+}
+
 const listIncomingSchedules = `-- name: ListIncomingSchedules :many
 SELECT id, location_id, po_number, expected_date, status, note, received_quantity, created_at, updated_at, deleted_at FROM incoming_schedules
 WHERE deleted_at IS NULL
@@ -499,7 +534,8 @@ ON CONFLICT (incoming_schedule_id, product_id) DO UPDATE SET
   quantity = EXCLUDED.quantity,
   received_quantity = EXCLUDED.received_quantity,
   status = EXCLUDED.status,
-  updated_at = now()
+  updated_at = now(),
+  deleted_at = NULL
 RETURNING id, incoming_schedule_id, product_id, quantity, received_quantity, status, created_at, updated_at, deleted_at
 `
 

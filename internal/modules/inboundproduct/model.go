@@ -91,7 +91,7 @@ type CreateScheduleRequest struct {
 	PONumber     string                  `json:"po_number" binding:"required"`
 	ExpectedDate string                  `json:"expected_date" binding:"required"` // Format: YYYY-MM-DD
 	Note         string                  `json:"note"`
-	Items        []CreateScheduleItemDTO `json:"items"`
+	Items        []CreateScheduleItemDTO `json:"items" binding:"required,min=1"`
 }
 
 type CreateScheduleItemDTO struct {
@@ -105,7 +105,7 @@ type UpdateScheduleRequest struct {
 	ExpectedDate string                  `json:"expected_date" binding:"required"`
 	Status       string                  `json:"status" binding:"required"`
 	Note         string                  `json:"note"`
-	Items        []UpdateScheduleItemDTO `json:"items"`
+	Items        []UpdateScheduleItemDTO `json:"items" binding:"required,min=1"`
 }
 
 type UpdateScheduleItemDTO struct {

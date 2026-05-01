@@ -37,7 +37,8 @@ ON CONFLICT (incoming_schedule_id, product_id) DO UPDATE SET
   quantity = EXCLUDED.quantity,
   received_quantity = EXCLUDED.received_quantity,
   status = EXCLUDED.status,
-  updated_at = now()
+  updated_at = now(),
+  deleted_at = NULL
 RETURNING *;
 
 -- name: GetIncomingScheduleItems :many
@@ -93,3 +94,15 @@ SELECT i.*, p.name as product_name, p.sku_code as product_sku_code, p.uom as pro
 FROM product_receipt_items i
 JOIN products p ON i.product_id = p.id
 WHERE i.product_receipt_id = $1 AND i.deleted_at IS NULL;
+
+-- name: IncrementScheduleItemReceivedQuantity :exec
+UPDATE incoming_schedule_items
+SET received_quantity = received_quantity + $3,
+    updated_at = now()
+WHERE incoming_schedule_id = $1 AND product_id = $2 AND deleted_at IS NULL;
+
+-- name: IncrementScheduleReceivedQuantity :exec
+UPDATE incoming_schedules
+SET received_quantity = received_quantity + $2,
+    updated_at = now()
+WHERE id = $1 AND deleted_at IS NULL;

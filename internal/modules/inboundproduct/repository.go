@@ -30,6 +30,13 @@ type Repository interface {
 	BulkCreateReceiptItems(ctx context.Context, receiptID int64, productIDs []int64, quantities []decimal.Decimal) error
 	GetReceiptItems(ctx context.Context, receiptID int64) ([]ProductReceiptItem, error)
 
+	// Increment
+	IncrementScheduleItemReceivedQuantity(ctx context.Context, arg sqlc.IncrementScheduleItemReceivedQuantityParams) error
+	IncrementScheduleReceivedQuantity(ctx context.Context, arg sqlc.IncrementScheduleReceivedQuantityParams) error
+
+	// Inventory
+	BulkAddInventories(ctx context.Context, arg sqlc.BulkAddInventoriesParams) error
+
 	WithTx(querier sqlc.Querier) Repository
 }
 
@@ -43,6 +50,18 @@ func NewRepository(querier sqlc.Querier) Repository {
 
 func (r *repository) WithTx(querier sqlc.Querier) Repository {
 	return &repository{querier: querier}
+}
+
+func (r *repository) IncrementScheduleItemReceivedQuantity(ctx context.Context, arg sqlc.IncrementScheduleItemReceivedQuantityParams) error {
+	return r.querier.IncrementScheduleItemReceivedQuantity(ctx, arg)
+}
+
+func (r *repository) IncrementScheduleReceivedQuantity(ctx context.Context, arg sqlc.IncrementScheduleReceivedQuantityParams) error {
+	return r.querier.IncrementScheduleReceivedQuantity(ctx, arg)
+}
+
+func (r *repository) BulkAddInventories(ctx context.Context, arg sqlc.BulkAddInventoriesParams) error {
+	return r.querier.BulkAddInventories(ctx, arg)
 }
 
 func (r *repository) CreateSchedule(ctx context.Context, arg sqlc.CreateIncomingScheduleParams) (IncomingSchedule, error) {

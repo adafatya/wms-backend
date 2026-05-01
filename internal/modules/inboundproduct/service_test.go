@@ -81,6 +81,21 @@ func (m *mockRepository) GetReceiptItems(ctx context.Context, receiptID int64) (
 	return args.Get(0).([]ProductReceiptItem), args.Error(1)
 }
 
+func (m *mockRepository) IncrementScheduleItemReceivedQuantity(ctx context.Context, arg sqlc.IncrementScheduleItemReceivedQuantityParams) error {
+	args := m.Called(ctx, arg)
+	return args.Error(0)
+}
+
+func (m *mockRepository) IncrementScheduleReceivedQuantity(ctx context.Context, arg sqlc.IncrementScheduleReceivedQuantityParams) error {
+	args := m.Called(ctx, arg)
+	return args.Error(0)
+}
+
+func (m *mockRepository) BulkAddInventories(ctx context.Context, arg sqlc.BulkAddInventoriesParams) error {
+	args := m.Called(ctx, arg)
+	return args.Error(0)
+}
+
 func (m *mockRepository) WithTx(querier sqlc.Querier) Repository {
 	return m
 }
@@ -153,6 +168,8 @@ func TestService_UpdateSchedule(t *testing.T) {
 		mockRepo.On("UpdateSchedule", ctx, mock.MatchedBy(func(p sqlc.UpdateIncomingScheduleParams) bool {
 			return p.ID == id && p.PoNumber == "PO-001-UPD" && p.ExpectedDate.Equal(expectedDate)
 		})).Return(IncomingSchedule{ID: id}, nil)
+
+		mockRepo.On("DeleteScheduleItems", ctx, id).Return(nil)
 
 		mockRepo.On("UpsertScheduleItem", ctx, mock.MatchedBy(func(p sqlc.UpsertIncomingScheduleItemParams) bool {
 			return p.IncomingScheduleID == id && p.ProductID == 1 && p.Quantity == "15"

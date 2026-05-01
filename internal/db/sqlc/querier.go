@@ -10,6 +10,7 @@ import (
 )
 
 type Querier interface {
+	BulkAddInventories(ctx context.Context, arg BulkAddInventoriesParams) error
 	BulkCreateProductReceiptItems(ctx context.Context, arg BulkCreateProductReceiptItemsParams) error
 	BulkUpsertInventories(ctx context.Context, arg BulkUpsertInventoriesParams) error
 	CountIncomingSchedules(ctx context.Context) (int64, error)
@@ -41,6 +42,8 @@ type Querier interface {
 	GetProductReceiptItems(ctx context.Context, productReceiptID int64) ([]GetProductReceiptItemsRow, error)
 	GetRole(ctx context.Context, id int64) (Role, error)
 	GetUser(ctx context.Context, id int64) (User, error)
+	IncrementScheduleItemReceivedQuantity(ctx context.Context, arg IncrementScheduleItemReceivedQuantityParams) error
+	IncrementScheduleReceivedQuantity(ctx context.Context, arg IncrementScheduleReceivedQuantityParams) error
 	ListIncomingSchedules(ctx context.Context, arg ListIncomingSchedulesParams) ([]IncomingSchedule, error)
 	ListInventories(ctx context.Context, arg ListInventoriesParams) ([]ListInventoriesRow, error)
 	ListLocations(ctx context.Context, arg ListLocationsParams) ([]Location, error)

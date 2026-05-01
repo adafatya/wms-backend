@@ -117,6 +117,12 @@ func (s *service) UpdateSchedule(ctx context.Context, id int64, req UpdateSchedu
 			return err
 		}
 
+		// Reconciliation: Delete existing items first, then upsert new ones
+		// With our SQL fix, Upsert will reset deleted_at to NULL
+		if err := txRepo.DeleteScheduleItems(ctx, id); err != nil {
+			return err
+		}
+
 		// Logic for items reconciliation/upsert
 		for _, item := range req.Items {
 			_, err := txRepo.UpsertScheduleItem(ctx, sqlc.UpsertIncomingScheduleItemParams{
@@ -162,6 +168,13 @@ func (s *service) CreateReceipt(ctx context.Context, req CreateReceiptRequest) (
 	err := s.store.ExecTx(ctx, func(q sqlc.Querier) error {
 		txRepo := s.repo.WithTx(q)
 
+		productIDs := make([]int64, len(req.Items))
+		quantities := make([]decimal.Decimal, len(req.Items))
+		for i, item := range req.Items {
+			productIDs[i] = item.ProductID
+			quantities[i] = item.Quantity
+		}
+
 		var scheduleID sql.NullInt64
 		if req.IncomingScheduleID != nil {
 			scheduleID = sql.NullInt64{Int64: *req.IncomingScheduleID, Valid: true}
@@ -178,14 +191,46 @@ func (s *service) CreateReceipt(ctx context.Context, req CreateReceiptRequest) (
 			return err
 		}
 
-		productIDs := make([]int64, len(req.Items))
-		quantities := make([]decimal.Decimal, len(req.Items))
-		for i, item := range req.Items {
-			productIDs[i] = item.ProductID
-			quantities[i] = item.Quantity
+		if err := txRepo.BulkCreateReceiptItems(ctx, created.ID, productIDs, quantities); err != nil {
+			return err
 		}
 
-		if err := txRepo.BulkCreateReceiptItems(ctx, created.ID, productIDs, quantities); err != nil {
+		// Update received quantity if tied to schedule
+		if req.IncomingScheduleID != nil {
+			var totalReceived decimal.Decimal
+			for _, item := range req.Items {
+				totalReceived = totalReceived.Add(item.Quantity)
+				err := txRepo.IncrementScheduleItemReceivedQuantity(ctx, sqlc.IncrementScheduleItemReceivedQuantityParams{
+					IncomingScheduleID: *req.IncomingScheduleID,
+					ProductID:          item.ProductID,
+					ReceivedQuantity:   item.Quantity.String(),
+				})
+				if err != nil {
+					return err
+				}
+			}
+			err := txRepo.IncrementScheduleReceivedQuantity(ctx, sqlc.IncrementScheduleReceivedQuantityParams{
+				ID:               *req.IncomingScheduleID,
+				ReceivedQuantity: totalReceived.String(),
+			})
+			if err != nil {
+				return err
+			}
+		}
+
+		// Update inventory stock (increment)
+		qtyStrs := make([]string, len(quantities))
+		locationIDs := make([]int64, len(quantities))
+		for i, q := range quantities {
+			qtyStrs[i] = q.String()
+			locationIDs[i] = req.LocationID
+		}
+		err = txRepo.BulkAddInventories(ctx, sqlc.BulkAddInventoriesParams{
+			ProductIds:  productIDs,
+			LocationIds: locationIDs,
+			Quantities:  qtyStrs,
+		})
+		if err != nil {
 			return err
 		}
 
