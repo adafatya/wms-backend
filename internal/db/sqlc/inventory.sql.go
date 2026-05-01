@@ -13,6 +13,25 @@ import (
 	"github.com/lib/pq"
 )
 
+const bulkAddInventories = `-- name: BulkAddInventories :exec
+INSERT INTO inventories (product_id, location_id, quantity, updated_at)
+SELECT unnest($1::bigint[]), unnest($2::bigint[]), unnest($3::numeric[]), now()
+ON CONFLICT (product_id, location_id) DO UPDATE SET
+  quantity = inventories.quantity + EXCLUDED.quantity,
+  updated_at = now()
+`
+
+type BulkAddInventoriesParams struct {
+	ProductIds  []int64  `json:"product_ids"`
+	LocationIds []int64  `json:"location_ids"`
+	Quantities  []string `json:"quantities"`
+}
+
+func (q *Queries) BulkAddInventories(ctx context.Context, arg BulkAddInventoriesParams) error {
+	_, err := q.db.ExecContext(ctx, bulkAddInventories, pq.Array(arg.ProductIds), pq.Array(arg.LocationIds), pq.Array(arg.Quantities))
+	return err
+}
+
 const bulkUpsertInventories = `-- name: BulkUpsertInventories :exec
 INSERT INTO inventories (product_id, location_id, quantity, updated_at)
 SELECT unnest($1::bigint[]), unnest($2::bigint[]), unnest($3::numeric[]), now()

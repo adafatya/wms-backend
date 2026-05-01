@@ -9,6 +9,31 @@ import (
 	"time"
 )
 
+type IncomingSchedule struct {
+	ID               int64          `json:"id"`
+	LocationID       int64          `json:"location_id"`
+	PoNumber         string         `json:"po_number"`
+	ExpectedDate     time.Time      `json:"expected_date"`
+	Status           string         `json:"status"`
+	Note             sql.NullString `json:"note"`
+	ReceivedQuantity string         `json:"received_quantity"`
+	CreatedAt        time.Time      `json:"created_at"`
+	UpdatedAt        time.Time      `json:"updated_at"`
+	DeletedAt        sql.NullTime   `json:"deleted_at"`
+}
+
+type IncomingScheduleItem struct {
+	ID                 int64        `json:"id"`
+	IncomingScheduleID int64        `json:"incoming_schedule_id"`
+	ProductID          int64        `json:"product_id"`
+	Quantity           string       `json:"quantity"`
+	ReceivedQuantity   string       `json:"received_quantity"`
+	Status             string       `json:"status"`
+	CreatedAt          time.Time    `json:"created_at"`
+	UpdatedAt          time.Time    `json:"updated_at"`
+	DeletedAt          sql.NullTime `json:"deleted_at"`
+}
+
 type Inventory struct {
 	ProductID  int64        `json:"product_id"`
 	LocationID int64        `json:"location_id"`
@@ -35,6 +60,28 @@ type Product struct {
 	CreatedAt time.Time    `json:"created_at"`
 	UpdatedAt time.Time    `json:"updated_at"`
 	DeletedAt sql.NullTime `json:"deleted_at"`
+}
+
+type ProductReceipt struct {
+	ID                 int64          `json:"id"`
+	IncomingScheduleID sql.NullInt64  `json:"incoming_schedule_id"`
+	LocationID         int64          `json:"location_id"`
+	ReceivedDate       time.Time      `json:"received_date"`
+	ReceivedBy         int64          `json:"received_by"`
+	Note               sql.NullString `json:"note"`
+	CreatedAt          time.Time      `json:"created_at"`
+	UpdatedAt          time.Time      `json:"updated_at"`
+	DeletedAt          sql.NullTime   `json:"deleted_at"`
+}
+
+type ProductReceiptItem struct {
+	ID               int64        `json:"id"`
+	ProductReceiptID int64        `json:"product_receipt_id"`
+	ProductID        int64        `json:"product_id"`
+	Quantity         string       `json:"quantity"`
+	CreatedAt        time.Time    `json:"created_at"`
+	UpdatedAt        time.Time    `json:"updated_at"`
+	DeletedAt        sql.NullTime `json:"deleted_at"`
 }
 
 type Role struct {
